@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from app.draw.canvas import MainWindow
+from app.draw.window import MainWindow
 
 def initialize():
     app = QApplication(sys.argv)
