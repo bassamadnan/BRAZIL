@@ -1,19 +1,22 @@
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QPen
-from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtCore import Qt, QRectF, QPointF
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
+from app.utils.highlight import contains_line
 
 class Canvas(QWidget):
     def __init__(self, parent=None, toolbar=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: blue;")
         self.shapes = []
-        self.current_shape = None  
+        self.current_shape = None
         self.start_point = None
         self.dragging = False
-        self.toolbar = toolbar  
+        self.toolbar = toolbar
         self.selected_shape = None
+        self.drag_start_pos = None
+        self.shape_start_pos = None
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -21,7 +24,7 @@ class Canvas(QWidget):
             if isinstance(shape, Line):
                 painter.setPen(QPen(Qt.black, 3))
                 painter.drawLine(shape.start_point, shape.end_point)
-                
+
                 # highlight the selected line
                 if shape is self.selected_shape:
                     painter.setPen(QPen(Qt.yellow, 5))
@@ -45,7 +48,7 @@ class Canvas(QWidget):
                 shape_rect = self.current_shape.boundingRect()
                 painter.setPen(QPen(Qt.black, 3))
                 painter.drawRect(shape_rect)
-    
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.toolbar.mouse_tool.isChecked():
@@ -53,20 +56,22 @@ class Canvas(QWidget):
                 for shape in self.shapes:
                     if isinstance(shape, Rectangle) and shape.boundingRect().contains(event.pos()):
                         self.selected_shape = shape
+                        self.dragging = True
+                        self.drag_start_pos = event.pos()
+                        self.shape_start_pos = QPointF(self.selected_shape.start_point)
                         self.update()
                         break
                     elif isinstance(shape, Line):
-                        x1 = min(shape.start_point.x(), shape.end_point.x())
-                        y1 = min(shape.start_point.y(), shape.end_point.y())
-                        x2 = max(shape.start_point.x(), shape.end_point.x())
-                        y2 = max(shape.start_point.y(), shape.end_point.y())
-                        line_rect = QRectF(x1, y1, x2 - x1, y2 - y1)
-                        if line_rect.contains(event.pos()):
+                        if contains_line(shape, event.pos()):
                             self.selected_shape = shape
+                            self.dragging = True
+                            self.drag_start_pos = event.pos()
+                            self.shape_start_pos = QPointF(self.selected_shape.start_point)
                             self.update()
                             break
                 else:
                     self.selected_shape = None
+                    self.dragging = False
                     self.update()
             else:
                 self.start_point = event.pos()
@@ -74,16 +79,18 @@ class Canvas(QWidget):
                     self.current_shape = Line(self.start_point, self.start_point)
                 elif self.toolbar.rect_tool.isChecked():
                     self.current_shape = Rectangle(self.start_point, self.start_point)
-        elif event.button() == Qt.MidButton:  # Middle mouse button (mouse wheel) TODO: REMOVE
-            self.dragging = True 
-            self.start_point = event.pos()
-            
+
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.MidButton:  # Middle mouse button (mouse wheel) TODO : REMOVE
-            if self.dragging:
-                delta = event.pos() - self.start_point
-                self.move(self.pos() + delta)
-                self.start_point = event.pos()
+        if event.buttons() & Qt.LeftButton and self.dragging:
+            delta = event.pos() - self.drag_start_pos
+            if isinstance(self.selected_shape, Rectangle):
+                self.selected_shape.start_point += delta
+                self.selected_shape.end_point += delta
+            elif isinstance(self.selected_shape, Line):
+                self.selected_shape.start_point += delta
+                self.selected_shape.end_point += delta
+            self.drag_start_pos = event.pos()
+            self.update()
         else:
             if self.current_shape:
                 if isinstance(self.current_shape, Line):
@@ -96,6 +103,6 @@ class Canvas(QWidget):
         if event.button() == Qt.LeftButton and self.current_shape:
             self.shapes.append(self.current_shape)
             self.current_shape = None
-        if event.button() == Qt.MidButton:  # Middle mouse button (mouse wheel) TODO : REMOVE
+        if event.button() == Qt.LeftButton:
             self.dragging = False
         self.start_point = None
