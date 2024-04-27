@@ -12,15 +12,20 @@ class Canvas(QWidget):
         self.shape_manager = ShapeManager()
         self.start_point = None
         self.toolbar = toolbar
+        self.toolbar.hide_shape_options_menu()
 
     def paintEvent(self, event):
         painter = QPainter(self)
         self.shape_manager.draw_shapes(painter)
-
+    
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.toolbar.mouse_tool.isChecked():
                 self.shape_manager.select_shape(event.pos())
+                if self.shape_manager.selected_shape:
+                    self.toolbar.show_shape_options_menu()
+                else:
+                    self.toolbar.hide_shape_options_menu()
             else:
                 self.start_point = event.pos()
                 if self.toolbar.line_tool.isChecked():
@@ -46,3 +51,9 @@ class Canvas(QWidget):
             self.shape_manager.dragging = False
         self.start_point = None
         self.update()
+
+    def show_sidebar(self):
+        self.sidebar.show()
+
+    def hide_sidebar(self):
+        self.sidebar.hide()

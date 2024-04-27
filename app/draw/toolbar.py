@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QToolBar, QAction, QActionGroup
+from PyQt5.QtWidgets import QToolBar, QAction, QActionGroup, QWidget, QHBoxLayout, QPushButton, QWidgetAction
 from PyQt5.QtGui import QPainter, QPen, QIcon, QPixmap, QPolygon
 from PyQt5.QtCore import Qt, QSize, QPoint
 
@@ -38,7 +38,6 @@ class ToolBar(QToolBar):
 
         self.line_tool = QAction(QIcon(line_icon_pixmap), "Line", self)
         self.line_tool.setCheckable(True)
-        # self.line_tool.setChecked(True)
         self.exclusive_group.addAction(self.line_tool)
         self.addAction(self.line_tool)
 
@@ -55,5 +54,28 @@ class ToolBar(QToolBar):
         self.exclusive_group.addAction(self.rect_tool)
         self.addAction(self.rect_tool)
 
-
         self.addSeparator()
+
+        # Shape options widget
+        self.shape_options_widget = QWidget()
+        self.shape_options_layout = QHBoxLayout(self.shape_options_widget)
+
+        delete_button = QPushButton("Delete")
+        edit_button = QPushButton("Edit")
+        copy_button = QPushButton("Copy")
+
+        self.shape_options_layout.addWidget(delete_button)
+        self.shape_options_layout.addWidget(edit_button)
+        self.shape_options_layout.addWidget(copy_button)
+
+        shape_options_widget_action = QWidgetAction(self)
+        shape_options_widget_action.setDefaultWidget(self.shape_options_widget)
+        self.addAction(shape_options_widget_action)
+
+        self.shape_options_widget.hide()
+
+    def show_shape_options_menu(self):
+        self.shape_options_widget.show()
+
+    def hide_shape_options_menu(self):
+        self.shape_options_widget.hide()
