@@ -12,3 +12,4 @@ class Shape(ABC):
     @abstractmethod
     def boundingRect(self):
         pass
+
