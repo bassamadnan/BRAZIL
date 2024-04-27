@@ -1,5 +1,4 @@
-from PyQt5.QtCore import QPointF, QRectF
-
+from PyQt5.QtCore import QPointF, QLineF
 
 class Line:
     def __init__(self, start_point, end_point):
@@ -7,16 +6,11 @@ class Line:
         self.end_point = QPointF(end_point)
 
     def boundingRect(self):
-        x1, y1 = self.start_point.x(), self.start_point.y()
-        x2, y2 = self.end_point.x(), self.end_point.y()
-        left = min(x1, x2)
-        top = min(y1, y2)
-        right = max(x1, x2)
-        bottom = max(y1, y2)
-        return QRectF(left, top, right - left, bottom - top)
+        line = QLineF(self.start_point, self.end_point)
+        pen_width = 3  # thickness :*
+        return line.boundingRect().adjusted(-pen_width / 2, -pen_width / 2, pen_width / 2, pen_width / 2)
 
     def length(self):
         dx = self.end_point.x() - self.start_point.x()
         dy = self.end_point.y() - self.start_point.y()
         return (dx ** 2 + dy ** 2) ** 0.5
-
