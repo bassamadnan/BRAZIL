@@ -1,7 +1,10 @@
 from PyQt5.QtWidgets import QToolBar, QAction, QActionGroup, QWidget, QHBoxLayout, QPushButton, QWidgetAction
 from PyQt5.QtGui import QPainter, QPen, QIcon, QPixmap, QPolygon
-from PyQt5.QtCore import Qt, QSize, QPoint
+from PyQt5.QtCore import Qt, QSize, QPoint, QPointF
 from app.draw.shapeEdit import ShapeEditDialog
+from copy import deepcopy
+from app.shapes.line import Line
+from app.shapes.rectangle import Rectangle
 
 class ToolBar(QToolBar):
     def __init__(self, parent=None):
@@ -125,6 +128,18 @@ class ToolBar(QToolBar):
     def handle_copy_button_click(self):
         if self.selected_shape:
             print(f"Copy button clicked for {self.selected_shape}")
+            new_shape = deepcopy(self.selected_shape) # create deepc opy so original dosnt get manipulated
+            # shift ammount currently set as 5 by default, TODO ? set as a variable
+            shift_x = 5 
+            shift_y = 5 
+            if isinstance(new_shape, Line):
+                new_shape.start_point += QPointF(shift_x, shift_y)
+                new_shape.end_point += QPointF(shift_x, shift_y)
+            elif isinstance(new_shape, Rectangle):
+                new_shape.start_point += QPointF(shift_x, shift_y)
+                new_shape.end_point += QPointF(shift_x, shift_y)
+
+            self.canvas.shape_manager.add_shape(new_shape)
+            self.canvas.update()
         else:
             print("No shape selected")
-        # Add your copy functionality here

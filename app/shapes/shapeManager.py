@@ -21,6 +21,7 @@ class ShapeManager:
             self.shapes.remove(shape)
             if self.selected_shape == shape:
                 self.selected_shape = None
+        # print(self.shapes)
 
     def select_shape(self, pos):
         for shape in self.shapes:
@@ -54,7 +55,7 @@ class ShapeManager:
     def draw_shapes(self, painter):
         for shape in self.shapes:
             if isinstance(shape, Line):
-                painter.setPen(QPen(Qt.black, 3))
+                painter.setPen(QPen(shape.color, 3))
                 painter.drawLine(shape.start_point, shape.end_point)
 
                 # highlight the selected line
@@ -63,13 +64,19 @@ class ShapeManager:
                     painter.drawLine(shape.start_point, shape.end_point)
             elif isinstance(shape, Rectangle):
                 shape_rect = shape.boundingRect()
-                painter.setPen(QPen(Qt.black, 3))
-                painter.drawRect(shape_rect)
+                painter.setPen(QPen(shape.color, 3))
+                if shape.rounded:
+                    painter.drawRoundedRect(shape_rect, 10, 10)  # Adjust the radius as needed
+                else:
+                    painter.drawRect(shape_rect)
 
                 # highlight the rectangle
                 if shape is self.selected_shape:
                     painter.setPen(QPen(Qt.yellow, 3))
-                    painter.drawRect(shape_rect)
+                    if shape.rounded:
+                        painter.drawRoundedRect(shape_rect, 10, 10)
+                    else:
+                        painter.drawRect(shape_rect)
 
         # drawing logic
         if self.current_shape:
@@ -79,4 +86,7 @@ class ShapeManager:
             elif isinstance(self.current_shape, Rectangle):
                 shape_rect = self.current_shape.boundingRect()
                 painter.setPen(QPen(Qt.black, 3))
-                painter.drawRect(shape_rect)
+                if self.current_shape.rounded:
+                    painter.drawRoundedRect(shape_rect, 10, 10)
+                else:
+                    painter.drawRect(shape_rect)
