@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QToolBar, QAction, QActionGroup, QWidget, QHBoxLayout, QPushButton, QWidgetAction
 from PyQt5.QtGui import QPainter, QPen, QIcon, QPixmap, QPolygon
 from PyQt5.QtCore import Qt, QSize, QPoint
+from app.draw.shapeEdit import ShapeEditDialog
 
 class ToolBar(QToolBar):
     def __init__(self, parent=None):
@@ -61,8 +62,11 @@ class ToolBar(QToolBar):
         self.shape_options_layout = QHBoxLayout(self.shape_options_widget)
 
         delete_button = QPushButton("Delete")
+        delete_button.clicked.connect(self.handle_delete_button_click)
         edit_button = QPushButton("Edit")
+        edit_button.clicked.connect(self.handle_edit_button_click)
         copy_button = QPushButton("Copy")
+        copy_button.clicked.connect(self.handle_copy_button_click)
 
         self.shape_options_layout.addWidget(delete_button)
         self.shape_options_layout.addWidget(edit_button)
@@ -73,9 +77,54 @@ class ToolBar(QToolBar):
         self.addAction(shape_options_widget_action)
 
         self.shape_options_widget.hide()
+        self.selected_shape = None
+        self.canvas = None
+
+    def setup_signals(self, canvas):
+        self.canvas = canvas
+        canvas.shapeSelected.connect(self.handle_shape_selected)
+        canvas.shapeDeselected.connect(self.handle_shape_deselected)
 
     def show_shape_options_menu(self):
         self.shape_options_widget.show()
 
     def hide_shape_options_menu(self):
         self.shape_options_widget.hide()
+
+    def handle_shape_selected(self, shape):
+        self.selected_shape = shape
+        print(f"Selected shape: {self.selected_shape}")
+        # Enable the edit/copy/delete buttons here
+        pass
+
+    def handle_shape_deselected(self):
+        self.selected_shape = None
+        # Disable the edit/copy/delete buttons here
+        pass
+
+    def handle_delete_button_click(self):
+        if self.selected_shape:
+            print(f"Delete button clicked for {self.selected_shape}")
+            self.canvas.shape_manager.remove_shape(self.selected_shape)
+            self.canvas.update()
+            self.selected_shape = None
+            self.hide_shape_options_menu()
+        else:
+            print("No shape selected")
+
+    def handle_edit_button_click(self):
+        if self.selected_shape:
+            print(f"Edit button clicked for {self.selected_shape}")
+            edit_dialog = ShapeEditDialog(self.selected_shape, self)
+            edit_dialog.exec_()
+            # Update the canvas after closing the dialog
+            self.canvas.update()
+        else:
+            print("No shape selected")
+
+    def handle_copy_button_click(self):
+        if self.selected_shape:
+            print(f"Copy button clicked for {self.selected_shape}")
+        else:
+            print("No shape selected")
+        # Add your copy functionality here

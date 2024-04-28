@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QPen
-from PyQt5.QtCore import Qt,  QPointF
+from PyQt5.QtCore import Qt, QPointF
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
 from app.utils.highlight import contains_line
@@ -15,6 +15,12 @@ class ShapeManager:
 
     def add_shape(self, shape):
         self.shapes.append(shape)
+
+    def remove_shape(self, shape):
+        if shape in self.shapes:
+            self.shapes.remove(shape)
+            if self.selected_shape == shape:
+                self.selected_shape = None
 
     def select_shape(self, pos):
         for shape in self.shapes:

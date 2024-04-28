@@ -8,8 +8,8 @@ class DrawingArea(QWidget):
         self.setMinimumSize(400, 400)
 
         self.toolbar = ToolBar(self)
-
         self.canvas = Canvas(self, self.toolbar)  # Pass the toolbar instance
+        self.toolbar.setup_signals(self.canvas)  # Setup signals after canvas is initialized
 
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)

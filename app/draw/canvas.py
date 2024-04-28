@@ -1,11 +1,14 @@
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
 from app.shapes.shapeManager import ShapeManager
 
 class Canvas(QWidget):
+    shapeSelected = pyqtSignal(object)  # Custom signal to emit the selected shape
+    shapeDeselected = pyqtSignal()  # Custom signal to emit when no shape is selected
+
     def __init__(self, parent=None, toolbar=None):
         super().__init__(parent)
         self.setStyleSheet("background-color: blue;")
@@ -17,14 +20,16 @@ class Canvas(QWidget):
     def paintEvent(self, event):
         painter = QPainter(self)
         self.shape_manager.draw_shapes(painter)
-    
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.toolbar.mouse_tool.isChecked():
                 self.shape_manager.select_shape(event.pos())
                 if self.shape_manager.selected_shape:
+                    self.shapeSelected.emit(self.shape_manager.selected_shape)
                     self.toolbar.show_shape_options_menu()
                 else:
+                    self.shapeDeselected.emit()
                     self.toolbar.hide_shape_options_menu()
             else:
                 self.start_point = event.pos()
@@ -51,9 +56,3 @@ class Canvas(QWidget):
             self.shape_manager.dragging = False
         self.start_point = None
         self.update()
-
-    def show_sidebar(self):
-        self.sidebar.show()
-
-    def hide_sidebar(self):
-        self.sidebar.hide()
