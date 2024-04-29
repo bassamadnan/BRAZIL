@@ -23,20 +23,26 @@ class Canvas(QWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            if self.toolbar.mouse_tool.isChecked():
-                self.shape_manager.select_shape(event.pos())
-                if self.shape_manager.selected_shape:
-                    self.shapeSelected.emit(self.shape_manager.selected_shape)
-                    self.toolbar.show_shape_options_menu()
-                else:
-                    self.shapeDeselected.emit()
-                    self.toolbar.hide_shape_options_menu()
+            if event.modifiers() & Qt.ControlModifier:
+                # Toggle selection for the shape at the clicked position
+                self.toggle_selection(event.pos())
             else:
-                self.start_point = event.pos()
-                if self.toolbar.line_tool.isChecked():
-                    self.shape_manager.current_shape = Line(self.start_point, self.start_point)
-                elif self.toolbar.rect_tool.isChecked():
-                    self.shape_manager.current_shape = Rectangle(self.start_point, self.start_point)
+                # Deselect previously selected shapes and select a new one
+                self.shape_manager.selected_shapes.clear()
+                if self.toolbar.mouse_tool.isChecked():
+                    self.shape_manager.select_shape(event.pos())
+                    if self.shape_manager.selected_shape:
+                        self.shapeSelected.emit(self.shape_manager.selected_shape)
+                        self.toolbar.show_shape_options_menu()
+                    else:
+                        self.shapeDeselected.emit()
+                        self.toolbar.hide_shape_options_menu()
+                else:
+                    self.start_point = event.pos()
+                    if self.toolbar.line_tool.isChecked():
+                        self.shape_manager.current_shape = Line(self.start_point, self.start_point)
+                    elif self.toolbar.rect_tool.isChecked():
+                        self.shape_manager.current_shape = Rectangle(self.start_point, self.start_point)
         self.update()
 
     def mouseMoveEvent(self, event):
@@ -64,3 +70,12 @@ class Canvas(QWidget):
     def handle_delete_shortcut(self):
         if self.shape_manager.selected_shape:
             self.toolbar.shape_options_widget.delete_button_clicked()
+
+    def toggle_selection(self, pos):
+        shape = self.shape_manager.get_shape_at_pos(pos)
+        if shape:
+            if shape in self.shape_manager.selected_shapes:
+                self.shape_manager.selected_shapes.remove(shape)
+            else:
+                self.shape_manager.selected_shapes.add(shape)
+        self.update()

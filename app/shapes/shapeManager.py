@@ -12,6 +12,7 @@ class ShapeManager:
         self.dragging = False
         self.drag_start_pos = None
         self.shape_start_pos = None
+        self.selected_shapes = set()
 
     def add_shape(self, shape):
         self.shapes.append(shape)
@@ -58,20 +59,20 @@ class ShapeManager:
                 painter.setPen(QPen(shape.color, 3))
                 painter.drawLine(shape.start_point, shape.end_point)
 
-                # highlight the selected line
-                if shape is self.selected_shape:
+                # highlight the selected lines
+                if shape in self.selected_shapes or shape is self.selected_shape:
                     painter.setPen(QPen(Qt.yellow, 5))
                     painter.drawLine(shape.start_point, shape.end_point)
             elif isinstance(shape, Rectangle):
                 shape_rect = shape.boundingRect()
                 painter.setPen(QPen(shape.color, 3))
                 if shape.rounded:
-                    painter.drawRoundedRect(shape_rect, 10, 10)  # Adjust the radius as needed
+                    painter.drawRoundedRect(shape_rect, 10, 10)
                 else:
                     painter.drawRect(shape_rect)
 
-                # highlight the rectangle
-                if shape is self.selected_shape:
+                # highlight the selected rectangles
+                if shape in self.selected_shapes or shape is self.selected_shape:
                     painter.setPen(QPen(Qt.yellow, 3))
                     if shape.rounded:
                         painter.drawRoundedRect(shape_rect, 10, 10)
@@ -90,3 +91,12 @@ class ShapeManager:
                     painter.drawRoundedRect(shape_rect, 10, 10)
                 else:
                     painter.drawRect(shape_rect)
+
+    def get_shape_at_pos(self, pos):
+        for shape in self.shapes:
+            if isinstance(shape, Rectangle) and shape.boundingRect().contains(pos):
+                return shape
+            elif isinstance(shape, Line):
+                if contains_line(shape, pos):
+                    return shape
+        return None
