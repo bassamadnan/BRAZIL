@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QWidget
-from PyQt5.QtGui import QPainter
+from PyQt5.QtGui import QPainter, QKeyEvent
 from PyQt5.QtCore import Qt, pyqtSignal
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
@@ -56,3 +56,11 @@ class Canvas(QWidget):
             self.shape_manager.dragging = False
         self.start_point = None
         self.update()
+
+    def handle_copy_shortcut(self):
+        if self.shape_manager.selected_shape:
+            self.toolbar.shape_options_widget.copy_button_clicked()
+
+    def handle_delete_shortcut(self):
+        if self.shape_manager.selected_shape:
+            self.toolbar.shape_options_widget.delete_button_clicked()
