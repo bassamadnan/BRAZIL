@@ -14,13 +14,17 @@ class Group:
         y_coords = []
 
         for obj in self.objects:
-            if isinstance(obj, Rectangle):
+            if isinstance(obj, Group):
                 rect = obj.boundingRect()
-                x_coords.extend([rect.x(), rect.x() + rect.width()])
-                y_coords.extend([rect.y(), rect.y() + rect.height()])
+            elif isinstance(obj, Rectangle):
+                rect = obj.boundingRect()
             elif isinstance(obj, Line):
                 x_coords.extend([obj.start_point.x(), obj.end_point.x()])
                 y_coords.extend([obj.start_point.y(), obj.end_point.y()])
+                continue
+
+            x_coords.extend([rect.x(), rect.x() + rect.width()])
+            y_coords.extend([rect.y(), rect.y() + rect.height()])
 
         if not x_coords or not y_coords:
             return QRectF()

@@ -19,11 +19,15 @@ class ShapeOptionsWidget(QWidget):
         copy_button.clicked.connect(self.copy_button_clicked)
         group_button = QPushButton("Group")
         group_button.clicked.connect(self.group_button_clicked)
-
+        group_button.clicked.connect(self.group_button_clicked)
+        ungroup_button = QPushButton("Ungroup")
+        ungroup_button.clicked.connect(self.ungroup_button_clicked)
+        
         layout.addWidget(delete_button)
         layout.addWidget(edit_button)
         layout.addWidget(copy_button)
         layout.addWidget(group_button)
+        layout.addWidget(ungroup_button)
 
 
 
@@ -82,6 +86,13 @@ class ShapeOptionsWidget(QWidget):
 
 
     def group_button_clicked(self):
-        if self.parent().canvas.shape_manager.selected_shapes:
+        if self.parent().canvas.shape_manager.selected_shapes or self.parent().canvas.shape_manager.selected_groups:
             self.parent().canvas.shape_manager.create_group()
             self.parent().canvas.update()
+
+    def ungroup_button_clicked(self):
+        if self.parent().selected_shape and isinstance(self.parent().selected_shape, Group):
+            self.parent().canvas.shape_manager.ungroup(self.parent().selected_shape)
+            self.parent().canvas.update()
+        else:
+            print("No group selected")

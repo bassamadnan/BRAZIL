@@ -15,6 +15,7 @@ class ShapeManager:
         self.drag_start_pos = None
         self.shape_start_pos = None
         self.selected_shapes = set()
+        self.selected_groups = set()
 
     def add_shape(self, shape):
         self.shapes.append(shape)
@@ -56,13 +57,7 @@ class ShapeManager:
         if self.dragging:
             delta = pos - self.drag_start_pos
             if isinstance(self.selected_shape, Group):
-                for shape in self.selected_shape.objects:
-                    if isinstance(shape, Rectangle):
-                        shape.start_point += delta
-                        shape.end_point += delta
-                    elif isinstance(shape, Line):
-                        shape.start_point += delta
-                        shape.end_point += delta
+                self.update_group_position(self.selected_shape, delta)
             elif isinstance(self.selected_shape, Rectangle):
                 self.selected_shape.start_point += delta
                 self.selected_shape.end_point += delta
@@ -70,6 +65,17 @@ class ShapeManager:
                 self.selected_shape.start_point += delta
                 self.selected_shape.end_point += delta
             self.drag_start_pos = pos
+
+    def update_group_position(self, group, delta):
+        for obj in group.objects:
+            if isinstance(obj, Group):
+                self.update_group_position(obj, delta)
+            elif isinstance(obj, Rectangle):
+                obj.start_point += delta
+                obj.end_point += delta
+            elif isinstance(obj, Line):
+                obj.start_point += delta
+                obj.end_point += delta
 
     def draw_shapes(self, painter):
         for group in self.groups:
@@ -156,26 +162,49 @@ class ShapeManager:
 
     def create_group(self):
         group_shapes = list(self.selected_shapes)
+        group_groups = list(self.selected_groups)
         print(group_shapes)
-        if group_shapes:
-            group = Group(group_shapes)
+        print(group_groups)
+        if group_shapes or group_groups:
+            group = Group()
+            for shape in group_shapes:
+                group.add_object(shape)
+            for subgroup in group_groups:
+                group.add_object(subgroup)
             self.groups.append(group)
             self.selected_shapes.clear()
+            self.selected_groups.clear()
             self.toggle_selection(group)
-
+    
     def ungroup(self, group):
         if group in self.groups:
             self.groups.remove(group)
-            self.shapes.extend(group.objects)
-
+            for obj in group.objects:
+                if isinstance(obj, Group):
+                    if obj not in self.groups:
+                        self.groups.append(obj)
+                else:
+                    if obj not in self.shapes:
+                        self.shapes.append(obj)
+            if self.selected_shape == group:
+                self.selected_shape = None
+    
     def remove_group(self, group):
         if group in self.groups:
             self.groups.remove(group)
-            for shape in group.objects:
-                self.shapes.remove(shape)
+            self.remove_group_objects(group)
             if self.selected_shape == group:
                 self.selected_shape = None
 
+    def remove_group_objects(self, group):
+        for obj in group.objects:
+            if isinstance(obj, Group):
+                self.remove_group_objects(obj)
+                if obj in self.groups:
+                    self.groups.remove(obj)
+            elif obj in self.shapes:
+                self.shapes.remove(obj)
+   
     def add_group(self, group):
         self.groups.append(group)
         for shape in group.objects:

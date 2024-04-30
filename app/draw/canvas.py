@@ -43,8 +43,17 @@ class Canvas(QWidget):
                         self.shape_manager.current_shape = Line(self.start_point, self.start_point)
                     elif self.toolbar.rect_tool.isChecked():
                         self.shape_manager.current_shape = Rectangle(self.start_point, self.start_point)
-        self.update()
+        elif event.button() == Qt.RightButton:
+            self.shape_manager.select_shape(event.pos())
+            if self.shape_manager.selected_shape:
+                self.shapeSelected.emit(self.shape_manager.selected_shape)
+                self.toolbar.show_shape_options_menu()
+            else:
+                self.shapeDeselected.emit()
+                self.toolbar.hide_shape_options_menu()
 
+        self.update()
+        
     def mouseMoveEvent(self, event):
         if self.shape_manager.current_shape:
             if isinstance(self.shape_manager.current_shape, Line):
