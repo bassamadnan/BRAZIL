@@ -20,7 +20,3 @@ class Group:
 
     def remove_object(self, obj):
         self.objects.remove(obj)
-
-    def draw(self, painter):
-        for obj in self.objects:
-            obj.draw(painter)
