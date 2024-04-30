@@ -1,4 +1,6 @@
 from PyQt5.QtCore import QRectF
+from app.shapes.rectangle import Rectangle
+from app.shapes.line import Line
 
 class Group:
     def __init__(self, objects=None):
@@ -7,12 +9,27 @@ class Group:
     def boundingRect(self):
         if not self.objects:
             return QRectF()
-        
-        rects = [obj.boundingRect() for obj in self.objects]
-        x1 = min(rect.x() for rect in rects)
-        y1 = min(rect.y() for rect in rects)
-        x2 = max(rect.x() + rect.width() for rect in rects)
-        y2 = max(rect.y() + rect.height() for rect in rects)
+
+        x_coords = []
+        y_coords = []
+
+        for obj in self.objects:
+            if isinstance(obj, Rectangle):
+                rect = obj.boundingRect()
+                x_coords.extend([rect.x(), rect.x() + rect.width()])
+                y_coords.extend([rect.y(), rect.y() + rect.height()])
+            elif isinstance(obj, Line):
+                x_coords.extend([obj.start_point.x(), obj.end_point.x()])
+                y_coords.extend([obj.start_point.y(), obj.end_point.y()])
+
+        if not x_coords or not y_coords:
+            return QRectF()
+
+        x1 = min(x_coords)
+        y1 = min(y_coords)
+        x2 = max(x_coords)
+        y2 = max(y_coords)
+
         return QRectF(x1, y1, x2 - x1, y2 - y1)
 
     def add_object(self, obj):

@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtGui import QPainter, QKeyEvent
+from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import Qt, pyqtSignal
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
@@ -72,10 +72,21 @@ class Canvas(QWidget):
             self.toolbar.shape_options_widget.delete_button_clicked()
 
     def toggle_selection(self, pos):
+        # Check if any group is clicked
+        for group in self.shape_manager.groups:
+            if group.boundingRect().contains(pos):
+                self.shape_manager.toggle_selection(group)
+                return
+
+        # Check if any individual shape is clicked
         shape = self.shape_manager.get_shape_at_pos(pos)
         if shape:
-            if shape in self.shape_manager.selected_shapes:
-                self.shape_manager.selected_shapes.remove(shape)
-            else:
-                self.shape_manager.selected_shapes.add(shape)
+            self.shape_manager.toggle_selection(shape)
+        else:
+            # If no shape is clicked and no Ctrl key is pressed, clear the selection
+            if not QApplication.keyboardModifiers() & Qt.ControlModifier:
+                self.shape_manager.selected_shapes.clear()
+
         self.update()
+
+    

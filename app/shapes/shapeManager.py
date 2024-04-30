@@ -3,10 +3,12 @@ from PyQt5.QtCore import Qt, QPointF
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
 from app.utils.highlight import contains_line
+from app.shapes.group import Group
 
 class ShapeManager:
     def __init__(self):
         self.shapes = []
+        self.groups = []
         self.current_shape = None
         self.selected_shape = None
         self.dragging = False
@@ -25,6 +27,14 @@ class ShapeManager:
         # print(self.shapes)
 
     def select_shape(self, pos):
+        for group in self.groups:
+            if group.boundingRect().contains(pos):
+                self.selected_shape = group
+                self.dragging = True
+                self.drag_start_pos = pos
+                self.shape_start_pos = QPointF(group.boundingRect().topLeft())
+                return
+
         for shape in self.shapes:
             if isinstance(shape, Rectangle) and shape.boundingRect().contains(pos):
                 self.selected_shape = shape
@@ -45,7 +55,15 @@ class ShapeManager:
     def update_shape_position(self, pos):
         if self.dragging:
             delta = pos - self.drag_start_pos
-            if isinstance(self.selected_shape, Rectangle):
+            if isinstance(self.selected_shape, Group):
+                for shape in self.selected_shape.objects:
+                    if isinstance(shape, Rectangle):
+                        shape.start_point += delta
+                        shape.end_point += delta
+                    elif isinstance(shape, Line):
+                        shape.start_point += delta
+                        shape.end_point += delta
+            elif isinstance(self.selected_shape, Rectangle):
                 self.selected_shape.start_point += delta
                 self.selected_shape.end_point += delta
             elif isinstance(self.selected_shape, Line):
@@ -54,12 +72,35 @@ class ShapeManager:
             self.drag_start_pos = pos
 
     def draw_shapes(self, painter):
+        for group in self.groups:
+            group_rect = group.boundingRect()
+            painter.setPen(QPen(Qt.black, 1, Qt.DotLine))  # Set dotted thin line pen
+            painter.drawRect(group_rect)
+
+            # Draw individual shapes within the group
+            for shape in group.objects:
+                if isinstance(shape, Line):
+                    painter.setPen(QPen(shape.color, 3))
+                    painter.drawLine(shape.start_point, shape.end_point)
+                elif isinstance(shape, Rectangle):
+                    shape_rect = shape.boundingRect()
+                    painter.setPen(QPen(shape.color, 3))
+                    if shape.rounded:
+                        painter.drawRoundedRect(shape_rect, 10, 10)
+                    else:
+                        painter.drawRect(shape_rect)
+
+            # Highlight the selected group
+            if group in self.selected_shapes:
+                painter.setPen(QPen(Qt.yellow, 1, Qt.DotLine))  # Set yellow dotted thin line pen
+                painter.drawRect(group_rect)
+            
         for shape in self.shapes:
             if isinstance(shape, Line):
                 painter.setPen(QPen(shape.color, 3))
                 painter.drawLine(shape.start_point, shape.end_point)
 
-                # highlight the selected lines
+                # Highlight the selected lines
                 if shape in self.selected_shapes or shape is self.selected_shape:
                     painter.setPen(QPen(Qt.yellow, 5))
                     painter.drawLine(shape.start_point, shape.end_point)
@@ -71,7 +112,7 @@ class ShapeManager:
                 else:
                     painter.drawRect(shape_rect)
 
-                # highlight the selected rectangles
+                # Highlight the selected rectangles
                 if shape in self.selected_shapes or shape is self.selected_shape:
                     painter.setPen(QPen(Qt.yellow, 3))
                     if shape.rounded:
@@ -79,7 +120,7 @@ class ShapeManager:
                     else:
                         painter.drawRect(shape_rect)
 
-        # drawing logic
+        # Drawing logic
         if self.current_shape:
             if isinstance(self.current_shape, Line):
                 painter.setPen(QPen(Qt.black, 3))
@@ -100,3 +141,42 @@ class ShapeManager:
                 if contains_line(shape, pos):
                     return shape
         return None
+    
+    def toggle_selection(self, obj):
+        if isinstance(obj, Group):
+            if obj in self.selected_shapes:
+                self.selected_shapes.remove(obj)
+            else:
+                self.selected_shapes.add(obj)
+        else:
+            if obj in self.selected_shapes:
+                self.selected_shapes.remove(obj)
+            else:
+                self.selected_shapes.add(obj)
+
+    def create_group(self):
+        group_shapes = list(self.selected_shapes)
+        print(group_shapes)
+        if group_shapes:
+            group = Group(group_shapes)
+            self.groups.append(group)
+            self.selected_shapes.clear()
+            self.toggle_selection(group)
+
+    def ungroup(self, group):
+        if group in self.groups:
+            self.groups.remove(group)
+            self.shapes.extend(group.objects)
+
+    def remove_group(self, group):
+        if group in self.groups:
+            self.groups.remove(group)
+            for shape in group.objects:
+                self.shapes.remove(shape)
+            if self.selected_shape == group:
+                self.selected_shape = None
+
+    def add_group(self, group):
+        self.groups.append(group)
+        for shape in group.objects:
+            self.shapes.append(shape)

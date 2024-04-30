@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QPointF, QLineF, Qt
+from PyQt5.QtCore import QPointF, QRectF, Qt
 from PyQt5.QtGui import QColor
 
 class Line:
@@ -8,10 +8,12 @@ class Line:
         self.color = color
 
     def boundingRect(self):
-        line = QLineF(self.start_point, self.end_point)
-        pen_width = 3  # thickness
-        return line.boundingRect().adjusted(-pen_width / 2, -pen_width / 2, pen_width / 2, pen_width / 2)
-
+        x1 = min(self.start_point.x(), self.end_point.x())
+        y1 = min(self.start_point.y(), self.end_point.y())
+        x2 = max(self.start_point.x(), self.end_point.x())
+        y2 = max(self.start_point.y(), self.end_point.y())
+        return QRectF(x1, y1, x2 - x1, y2 - y1)
+    
     def length(self):
         dx = self.end_point.x() - self.start_point.x()
         dy = self.end_point.y() - self.start_point.y()
