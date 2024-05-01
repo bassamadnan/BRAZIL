@@ -54,20 +54,15 @@ class ShapeOptionsWidget(QWidget):
         else:
             print("No shape selected")
 
+
     def copy_button_clicked(self):
         if self.parent().selected_shape:
             print(f"Copy button clicked for {self.parent().selected_shape}")
             if isinstance(self.parent().selected_shape, Group):
-                new_group = deepcopy(self.parent().selected_shape)
+                new_group = self.copy_group(self.parent().selected_shape)
                 shift_x = 5
                 shift_y = 5
-                for shape in new_group.objects:
-                    if isinstance(shape, Line):
-                        shape.start_point += QPointF(shift_x, shift_y)
-                        shape.end_point += QPointF(shift_x, shift_y)
-                    elif isinstance(shape, Rectangle):
-                        shape.start_point += QPointF(shift_x, shift_y)
-                        shape.end_point += QPointF(shift_x, shift_y)
+                self.shift_group_position(new_group, shift_x, shift_y)
                 self.parent().canvas.shape_manager.add_group(new_group)
             else:
                 new_shape = deepcopy(self.parent().selected_shape)
@@ -84,7 +79,17 @@ class ShapeOptionsWidget(QWidget):
         else:
             print("No shape selected")
 
-
+    def copy_group(self, group):
+        new_group = Group()
+        for obj in group.objects:
+            if isinstance(obj, Group):
+                new_subgroup = self.copy_group(obj)
+                new_group.add_object(new_subgroup)
+            else:
+                new_shape = deepcopy(obj)
+                new_group.add_object(new_shape)
+        return new_group
+    
     def group_button_clicked(self):
         if self.parent().canvas.shape_manager.selected_shapes or self.parent().canvas.shape_manager.selected_groups:
             self.parent().canvas.shape_manager.create_group()
@@ -96,3 +101,14 @@ class ShapeOptionsWidget(QWidget):
             self.parent().canvas.update()
         else:
             print("No group selected")
+
+    def shift_group_position(self, group, shift_x, shift_y):
+        for obj in group.objects:
+            if isinstance(obj, Group):
+                self.shift_group_position(obj, shift_x, shift_y)
+            elif isinstance(obj, Rectangle):
+                obj.start_point += QPointF(shift_x, shift_y)
+                obj.end_point += QPointF(shift_x, shift_y)
+            elif isinstance(obj, Line):
+                obj.start_point += QPointF(shift_x, shift_y)
+                obj.end_point += QPointF(shift_x, shift_y)

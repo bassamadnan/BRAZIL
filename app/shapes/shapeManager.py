@@ -195,7 +195,7 @@ class ShapeManager:
             self.remove_group_objects(group)
             if self.selected_shape == group:
                 self.selected_shape = None
-
+                
     def remove_group_objects(self, group):
         for obj in group.objects:
             if isinstance(obj, Group):
@@ -204,8 +204,16 @@ class ShapeManager:
                     self.groups.remove(obj)
             elif obj in self.shapes:
                 self.shapes.remove(obj)
+    
    
     def add_group(self, group):
         self.groups.append(group)
-        for shape in group.objects:
-            self.shapes.append(shape)
+        self.add_group_objects(group)
+
+    def add_group_objects(self, group):
+        for obj in group.objects:
+            if isinstance(obj, Group):
+                self.add_group_objects(obj)
+            else:
+                if obj not in self.shapes:
+                    self.shapes.append(obj)
