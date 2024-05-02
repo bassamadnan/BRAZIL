@@ -217,3 +217,9 @@ class ShapeManager:
             else:
                 if obj not in self.shapes:
                     self.shapes.append(obj)
+    
+    def export_shapes(self):
+        xml = ''
+        for shape in self.shapes:
+            xml += shape.export()
+        return xml

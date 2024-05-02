@@ -13,3 +13,6 @@ class Shape(ABC):
     def boundingRect(self):
         pass
 
+    @abstractmethod
+    def export(self):
+        pass
