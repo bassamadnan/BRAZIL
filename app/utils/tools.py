@@ -6,7 +6,9 @@ def create_mouse_tool_icon():
     mouse_icon_pixmap.fill(Qt.transparent)
     painter = QPainter(mouse_icon_pixmap)
     painter.setPen(QPen(Qt.black, 2))
-    points = [QPoint(10, 20), QPoint(25, 16), QPoint(25, 10), QPoint(30, 16), QPoint(30, 20)]
+    points = [QPoint(6, 6), QPoint(24, 12), QPoint(12, 24), QPoint(6, 6)]
+    painter.drawPolyline(QPolygon(points))
+    points = [QPoint(18, 18), QPoint(28, 28)]
     painter.drawPolyline(QPolygon(points))
     painter.end()
     return QIcon(mouse_icon_pixmap)
