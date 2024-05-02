@@ -217,13 +217,14 @@ class ShapeManager:
             if visited is None:
                 visited = set()
 
-            indent = "  " * level
+            indent = "  " * max(level - 1, 0)
             if isinstance(obj, Group):
                 if obj not in visited:
                     visited.add(obj)
                     if level: print(f"{indent}Group:")
                     for child_obj in obj.objects:
                         traverse(child_obj, level + 1, visited)
+                    if level: print(f"{indent}Group end")
             elif isinstance(obj, (Line, Rectangle)):
                 group = obj.belonging_group
                 print(f"{indent}{type(obj).__name__} (addr: {hex(id(obj))})- Group addr: {hex(id(group))}")
