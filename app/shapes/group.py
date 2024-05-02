@@ -5,7 +5,8 @@ from app.shapes.line import Line
 class Group:
     def __init__(self, objects=None):
         self.objects = objects or []
-
+        self.belonging_group = None
+    
     def boundingRect(self):
         if not self.objects:
             return QRectF()
@@ -38,6 +39,9 @@ class Group:
 
     def add_object(self, obj):
         self.objects.append(obj)
+        obj.belonging_group = self
+
 
     def remove_object(self, obj):
         self.objects.remove(obj)
+        obj.belonging_group = None

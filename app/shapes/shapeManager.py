@@ -170,14 +170,14 @@ class ShapeManager:
             self.groups.remove(group)
             for obj in group.objects:
                 if isinstance(obj, Group):
-                    if obj not in self.groups:
-                        self.groups.append(obj)
+                    self.ungroup(obj)  # Recursively ungroup nested groups
                 else:
                     if obj not in self.shapes:
                         self.shapes.append(obj)
+                obj.belonging_group = None
             if self.selected_shape == group:
                 self.selected_shape = None
-
+   
     def remove_group(self, group):
         if group in self.groups:
             self.groups.remove(group)
@@ -211,3 +211,28 @@ class ShapeManager:
         for shape in self.shapes:
             xml += shape.export()
         return xml
+
+    def iterate_objects(self):
+        def traverse(obj, level=0, visited=None):
+            if visited is None:
+                visited = set()
+
+            indent = "  " * level
+            if isinstance(obj, Group):
+                if obj not in visited:
+                    visited.add(obj)
+                    if level: print(f"{indent}Group:")
+                    for child_obj in obj.objects:
+                        traverse(child_obj, level + 1, visited)
+            elif isinstance(obj, (Line, Rectangle)):
+                group = obj.belonging_group
+                print(f"{indent}{type(obj).__name__} (addr: {hex(id(obj))})- Group addr: {hex(id(group))}")
+
+        visited = set()
+        for group in reversed(self.groups): # highest in heirarchy ! 
+            if group not in visited:
+                traverse(group, visited=visited)
+
+        for shape in self.shapes:
+            if shape.belonging_group is None:
+                print(f"{type(shape).__name__} - Belongs to: None")

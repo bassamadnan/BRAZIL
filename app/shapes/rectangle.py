@@ -10,6 +10,7 @@ class Rectangle(Shape):
         self.end_point = QPointF(end_point)
         self.rounded = rounded
         self.color = color
+        self.belonging_group = None
 
     def area(self):
         width = abs(self.end_point.x() - self.start_point.x())
@@ -61,4 +62,4 @@ class Rectangle(Shape):
         return xml
 
     def __repr__(self):
-        return f"Rectangle(start={self.start_point}, end={self.end_point}, rounded={self.rounded}, color={self.color.name()})"
+        return f"Rectangle(start={self.start_point}, end={self.end_point}, rounded={self.rounded}, color={self.color.name()} addr : {hex(id(self))})"

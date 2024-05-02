@@ -9,6 +9,7 @@ class Line(Shape):
         self.start_point = QPointF(start_point)
         self.end_point = QPointF(end_point)
         self.color = color
+        self.belonging_group = None
 
     def boundingRect(self):
         x1 = min(self.start_point.x(), self.end_point.x())
@@ -46,4 +47,4 @@ class Line(Shape):
         return xml
 
     def __repr__(self):
-        return f"Line(start={self.start_point}, end={self.end_point}, color={self.color.name()})"
+        return f"Line(start={self.start_point}, end={self.end_point}, color={self.color.name()}) addr : {hex(id(self))}"
