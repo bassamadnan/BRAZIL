@@ -2,7 +2,6 @@ from PyQt5.QtGui import QPen
 from PyQt5.QtCore import Qt, QPointF
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
-from app.utils.highlight import contains_line
 from app.shapes.group import Group
 
 class ShapeManager:
@@ -37,19 +36,12 @@ class ShapeManager:
                 return
 
         for shape in self.shapes:
-            if isinstance(shape, Rectangle) and shape.boundingRect().contains(pos):
+            if shape.distance(pos) < 15:
                 self.selected_shape = shape
                 self.dragging = True
                 self.drag_start_pos = pos
                 self.shape_start_pos = QPointF(self.selected_shape.start_point)
                 return
-            elif isinstance(shape, Line):
-                if contains_line(shape, pos):
-                    self.selected_shape = shape
-                    self.dragging = True
-                    self.drag_start_pos = pos
-                    self.shape_start_pos = QPointF(self.selected_shape.start_point)
-                    return
         self.selected_shape = None
         self.dragging = False
 
@@ -100,7 +92,7 @@ class ShapeManager:
             if group in self.selected_shapes:
                 painter.setPen(QPen(Qt.yellow, 1, Qt.DotLine))  # Set yellow dotted thin line pen
                 painter.drawRect(group_rect)
-            
+
         for shape in self.shapes:
             if isinstance(shape, Line):
                 painter.setPen(QPen(shape.color, 3))
@@ -141,13 +133,10 @@ class ShapeManager:
 
     def get_shape_at_pos(self, pos):
         for shape in self.shapes:
-            if isinstance(shape, Rectangle) and shape.boundingRect().contains(pos):
+            if shape.distance(pos) < 15:
                 return shape
-            elif isinstance(shape, Line):
-                if contains_line(shape, pos):
-                    return shape
         return None
-    
+
     def toggle_selection(self, obj):
         if isinstance(obj, Group):
             if obj in self.selected_shapes:
@@ -175,7 +164,7 @@ class ShapeManager:
             self.selected_shapes.clear()
             self.selected_groups.clear()
             self.toggle_selection(group)
-    
+
     def ungroup(self, group):
         if group in self.groups:
             self.groups.remove(group)
@@ -188,14 +177,14 @@ class ShapeManager:
                         self.shapes.append(obj)
             if self.selected_shape == group:
                 self.selected_shape = None
-    
+
     def remove_group(self, group):
         if group in self.groups:
             self.groups.remove(group)
             self.remove_group_objects(group)
             if self.selected_shape == group:
                 self.selected_shape = None
-                
+
     def remove_group_objects(self, group):
         for obj in group.objects:
             if isinstance(obj, Group):
@@ -204,8 +193,7 @@ class ShapeManager:
                     self.groups.remove(obj)
             elif obj in self.shapes:
                 self.shapes.remove(obj)
-    
-   
+
     def add_group(self, group):
         self.groups.append(group)
         self.add_group_objects(group)
@@ -217,7 +205,7 @@ class ShapeManager:
             else:
                 if obj not in self.shapes:
                     self.shapes.append(obj)
-    
+
     def export_shapes(self):
         xml = ''
         for shape in self.shapes:

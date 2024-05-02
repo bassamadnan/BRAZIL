@@ -1,8 +1,10 @@
 from PyQt5.QtCore import QPointF, QRectF, Qt
 from PyQt5.QtGui import QColor
-from app.utils.tools import get_color_name
+from app.shapes.shape import Shape
+from app.utils.colors import get_color_name
+from app.utils.highlight import distance_from_edge
 
-class Line:
+class Line(Shape):
     def __init__(self, start_point, end_point, color=QColor(Qt.black)):
         self.start_point = QPointF(start_point)
         self.end_point = QPointF(end_point)
@@ -19,6 +21,15 @@ class Line:
         dx = self.end_point.x() - self.start_point.x()
         dy = self.end_point.y() - self.start_point.y()
         return (dx ** 2 + dy ** 2) ** 0.5
+
+    def distance(self, point):
+        x = point.x()
+        y = point.y()
+        x1 = self.start_point.x()
+        y1 = self.start_point.y()
+        x2 = self.end_point.x()
+        y2 = self.end_point.y()
+        return distance_from_edge(x1, y1, x2, y2, x, y)
 
     def export(self):
         xml = "<line>\n"
