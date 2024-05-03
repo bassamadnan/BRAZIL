@@ -1,10 +1,12 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QMenu, QToolButton, QFileDialog
 from PyQt5.QtCore import QPointF
 from app.draw.shapeEdit import ShapeEditDialog
 from copy import deepcopy
 from app.shapes.line import Line
 from app.shapes.rectangle import Rectangle
 from app.shapes.group import Group
+from app.utils.window_instance import get_window
+import os
 
 class ShapeOptionsWidget(QWidget):
     def __init__(self, parent=None):
@@ -24,6 +26,16 @@ class ShapeOptionsWidget(QWidget):
         ungroup_button.clicked.connect(self.ungroup_button_clicked)
         debug_button = QPushButton("Debug")
         debug_button.clicked.connect(self.debug_print)
+
+        file_menu = QMenu(self)
+        import_action = file_menu.addAction("Import")
+        import_action.triggered.connect(self.import_file)
+        export_action = file_menu.addAction("Export")
+        export_action.triggered.connect(self.export_file)
+        file_button = QToolButton(self)
+        file_button.setText("File")
+        file_button.setMenu(file_menu)
+        file_button.setPopupMode(QToolButton.InstantPopup)
         
         layout.addWidget(delete_button)
         layout.addWidget(edit_button)
@@ -31,7 +43,7 @@ class ShapeOptionsWidget(QWidget):
         layout.addWidget(group_button)
         layout.addWidget(ungroup_button)
         layout.addWidget(debug_button)
-
+        layout.addWidget(file_button)
 
 
     def edit_button_clicked(self):
@@ -119,3 +131,25 @@ class ShapeOptionsWidget(QWidget):
             elif isinstance(obj, Line):
                 obj.start_point += QPointF(shift_x, shift_y)
                 obj.end_point += QPointF(shift_x, shift_y)
+
+    def export_file(self):
+        win = get_window()
+        xml_string = win.drawing_area.canvas.shape_manager.export_shapes()
+        xml_file_filter = "XML Files (*.xml)"
+        file_path, _ = QFileDialog.getSaveFileName(self, "Export XML File", "", xml_file_filter)
+
+        if file_path:
+            # Remove the extension if it already exists
+            root, ext = os.path.splitext(file_path)
+            if ext.lower() == '.xml':
+                file_path = root
+
+            # Add the .xml extension if it's not present
+            if not file_path.endswith('.xml'):
+                file_path += '.xml'
+
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(xml_string)
+
+    def import_file(self):
+        pass
