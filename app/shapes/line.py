@@ -3,6 +3,7 @@ from PyQt5.QtGui import QColor
 from app.shapes.shape import Shape
 from app.utils.colors import get_color_name
 from app.utils.highlight import distance_from_edge
+from app.utils.xml_indent import indent_xml
 
 class Line(Shape):
     def __init__(self, start_point, end_point, color=QColor(Qt.black)):
@@ -33,17 +34,17 @@ class Line(Shape):
         return distance_from_edge(x1, y1, x2, y2, x, y)
 
     def export(self):
-        xml = "<line>\n"
-        xml += "<begin>\n"
-        xml += f"<x>{int(self.start_point.x())}</x>\n"
-        xml += f"<y>{int(self.start_point.y())}</y>\n"
-        xml += "</begin>\n"
-        xml += "<end>\n"
-        xml += f"<x>{int(self.end_point.x())}</x>\n"
-        xml += f"<y>{int(self.end_point.y())}</y>\n"
-        xml += "</end>\n"
-        xml += f"<color>{get_color_name(self.color.name())}</color>\n"
-        xml += "</line>\n"
+        xml = indent_xml("<line>", 0)
+        xml += indent_xml("<begin>", 1)
+        xml += indent_xml(f"<x>{int(self.start_point.x())}</x>", 2)
+        xml += indent_xml(f"<y>{int(self.start_point.y())}</y>", 2)
+        xml += indent_xml("</begin>", 1)
+        xml += indent_xml("<end>", 1)
+        xml += indent_xml(f"<x>{int(self.end_point.x())}</x>", 2)
+        xml += indent_xml(f"<y>{int(self.end_point.y())}</y>", 2)
+        xml += indent_xml("</end>", 1)
+        xml += indent_xml(f"<color>{get_color_name(self.color.name())}</color>", 1)
+        xml += indent_xml("</line>", 0)
         return xml
 
     def __repr__(self):

@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, QPointF
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
 from app.shapes.group import Group
+from app.utils.xml_indent import nest
 
 class ShapeManager:
     def __init__(self):
@@ -15,6 +16,7 @@ class ShapeManager:
         self.shape_start_pos = None
         self.selected_shapes = set()
         self.selected_groups = set()
+        self.recent_export = []
 
     def add_shape(self, shape):
         self.shapes.append(shape)
@@ -206,11 +208,40 @@ class ShapeManager:
                 if obj not in self.shapes:
                     self.shapes.append(obj)
 
-    def export_shapes(self):
-        xml = ''
+    def export_all(self): 
+
+        def traverse(obj, level=0, visited=None):
+            if visited is None:
+                visited = set()
+
+            indent = "  " * max(level - 1, 0)
+            if isinstance(obj, Group):
+                if obj not in visited:
+                    visited.add(obj)
+                    if level: 
+                        print(f"{indent}Group:")
+                        self.recent_export.append(nest('<group>', indent))
+                    for child_obj in obj.objects:
+                        traverse(child_obj, level + 1, visited)
+                    if level: 
+                        print(f"{indent}Group end")
+                        self.recent_export.append(nest('</group>', indent))
+            elif isinstance(obj, (Line, Rectangle)):
+                group = obj.belonging_group
+                print(f"{indent}{type(obj).__name__} (addr: {hex(id(obj))})- Group addr: {hex(id(group))}")
+                self.recent_export.append(nest(obj.export(), indent))
+
+        visited = set()
+        for group in reversed(self.groups): # highest in heirarchy ! 
+            if group not in visited:
+                traverse(group, visited=visited)
+
         for shape in self.shapes:
-            xml += shape.export()
-        return xml
+            if shape.belonging_group is None:
+                print(f"{type(shape).__name__} - Belongs to: None")
+                self.recent_export.append(shape.export())
+        print(self.recent_export)
+        return '\n'.join(self.recent_export)
 
     def iterate_objects(self):
         def traverse(obj, level=0, visited=None):

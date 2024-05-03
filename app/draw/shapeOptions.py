@@ -134,7 +134,7 @@ class ShapeOptionsWidget(QWidget):
 
     def export_file(self):
         win = get_window()
-        xml_string = win.drawing_area.canvas.shape_manager.export_shapes()
+        xml_string = win.drawing_area.canvas.shape_manager.export_all()
         xml_file_filter = "XML Files (*.xml)"
         file_path, _ = QFileDialog.getSaveFileName(self, "Export XML File", "", xml_file_filter)
 
@@ -148,8 +148,8 @@ class ShapeOptionsWidget(QWidget):
             if not file_path.endswith('.xml'):
                 file_path += '.xml'
 
-        with open(file_path, 'w', encoding='utf-8') as f:
-            f.write(xml_string)
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(xml_string)
 
     def import_file(self):
         pass

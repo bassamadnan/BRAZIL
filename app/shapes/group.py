@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QRectF
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
+from app.utils.xml_indent import indent_xml, nest
 
 class Group:
     def __init__(self, objects=None):
@@ -45,3 +46,16 @@ class Group:
     def remove_object(self, obj):
         self.objects.remove(obj)
         obj.belonging_group = None
+
+    # def export(self, group, level=0):
+    #     print(group.objects,"heh")
+    #     xml = "<group>\n"
+    #     for obj in group.objects:
+    #         if isinstance(obj, Group):
+    #             xml += nest(obj.export(obj))
+    #         elif isinstance(obj, Rectangle):
+    #             xml += nest(obj.export())
+    #         elif isinstance(obj, Line):
+    #             xml += nest(obj.export())
+    #     xml += "</group>\n"
+    #     return xml

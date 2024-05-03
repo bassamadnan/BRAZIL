@@ -3,6 +3,7 @@ from PyQt5.QtGui import QColor
 from app.shapes.shape import Shape
 from app.utils.colors import get_color_name
 from app.utils.highlight import distance_from_edge
+from app.utils.xml_indent import indent_xml
 
 class Rectangle(Shape):
     def __init__(self, start_point, end_point, rounded=False, color=QColor(Qt.black)):
@@ -45,21 +46,21 @@ class Rectangle(Shape):
 
     def export(self):
         xml = "<rectangle>\n"
-        xml += "<upper-left>\n"
-        xml += f"<x>{int(self.start_point.x())}</x>\n"
-        xml += f"<y>{int(self.start_point.y())}</y>\n"
-        xml += "</upper-left>\n"
-        xml += "<lower-right>\n"
-        xml += f"<x>{int(self.end_point.x())}</x>\n"
-        xml += f"<y>{int(self.end_point.y())}</y>\n"
-        xml += "</lower-right>\n"
-        xml += f"<color>{get_color_name(self.color.name())}</color>\n"
-        if (self.rounded):
-            xml += "<corner>rounded</corner>\n"
+        xml += indent_xml("<upper-left>", 1)
+        xml += indent_xml(f"<x>{int(self.start_point.x())}</x>", 2)
+        xml += indent_xml(f"<y>{int(self.start_point.y())}</y>", 2)
+        xml += indent_xml("</upper-left>", 1)
+        xml += indent_xml("<lower-right>", 1)
+        xml += indent_xml(f"<x>{int(self.end_point.x())}</x>", 2)
+        xml += indent_xml(f"<y>{int(self.end_point.y())}</y>", 2)
+        xml += indent_xml("</lower-right>", 1)
+        xml += indent_xml(f"<color>{get_color_name(self.color.name())}</color>", 1)
+        if self.rounded:
+            xml += indent_xml("<corner>rounded</corner>", 1)
         else:
-            xml += "<corner>square</corner>\n"
+            xml += indent_xml("<corner>square</corner>", 1)
         xml += "</rectangle>\n"
         return xml
-
+    
     def __repr__(self):
         return f"Rectangle(start={self.start_point}, end={self.end_point}, rounded={self.rounded}, color={self.color.name()} addr : {hex(id(self))})"
