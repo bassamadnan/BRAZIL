@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QWidget, QApplication, QShortcut
-from PyQt5.QtGui import QPainter, QKeySequence
+from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import Qt, pyqtSignal
 from app.shapes.rectangle import Rectangle
 from app.shapes.line import Line
@@ -16,8 +16,6 @@ class Canvas(QWidget):
         self.start_point = None
         self.toolbar = toolbar
         self.toolbar.hide_shape_options_menu()
-        shortcut = QShortcut(QKeySequence(Qt.CTRL + Qt.Key_E), self)
-        shortcut.activated.connect(self.export_canvas)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -99,6 +97,3 @@ class Canvas(QWidget):
                 self.shape_manager.selected_shapes.clear()
 
         self.update()
-
-    def export_canvas(self):
-        print(self.shape_manager.export_shapes())
