@@ -1,0 +1,57 @@
+@startuml
+participant User
+participant ShapeOptionsWidget
+participant MainWindow
+participant DrawingArea
+participant Canvas
+participant ShapeManager
+participant Group
+participant Shape
+participant Utils
+participant FileDialog
+
+User -> ShapeOptionsWidget : export_file()
+ShapeOptionsWidget -> MainWindow : get_window()
+MainWindow --> ShapeOptionsWidget : return self
+ShapeOptionsWidget -> DrawingArea : canvas
+DrawingArea --> ShapeOptionsWidget : return self.canvas
+ShapeOptionsWidget -> Canvas : shape_manager
+Canvas --> ShapeOptionsWidget : return self.shape_manager
+ShapeOptionsWidget -> ShapeManager : export_all()
+ShapeManager -> ShapeManager : recent_export = []
+
+loop for each group in self.groups
+    ShapeManager -> Group : traverse(group)
+    Group -> Group : collect objects
+    loop for each object in group.objects
+        Group -> Shape : export()
+        Shape --> Group : Add XML string
+        Group --> ShapeManager : Add XML string
+    end
+end
+
+loop for each shape in self.shapes
+    alt shape belongs to no group
+        ShapeManager -> Shape : export()
+        Shape --> ShapeManager : Add XML string
+    end
+end
+
+ShapeManager --> ShapeOptionsWidget : return XML string
+
+ShapeOptionsWidget -> Utils : get_window()
+Utils --> ShapeOptionsWidget : return MainWindow instance
+ShapeOptionsWidget -> FileDialog : getSaveFileName()
+User --> FileDialog : Select file path and name
+FileDialog --> ShapeOptionsWidget : return file_path
+
+alt file_path is not empty
+    ShapeOptionsWidget -> Utils : check file extension
+    Utils -> Utils : handle file extension
+    ShapeOptionsWidget -> File : write(XML string)
+    ShapeOptionsWidget --> User : File saved
+else file_path is empty
+    ShapeOptionsWidget --> User : File not saved
+end
+
+@enduml

@@ -1,0 +1,190 @@
+@startuml
+skinparam monochrome true
+skinparam classAttributeIconSize 0
+
+package Drawing {
+    class DrawingArea {
+        - toolbar : ToolBar
+        - canvas : Canvas
+        + DrawingArea()
+        + keyPressEvent(event : QKeyEvent)
+    }
+
+    class ToolBar {
+        - exclusive_group : QActionGroup
+        - mouse_tool : QAction
+        - line_tool : QAction
+        - rect_tool : QAction
+        - shape_options_widget : ShapeOptionsWidget
+        - selected_shape : Shape
+        - canvas : Canvas
+        + ToolBar()
+        + setup_signals(canvas : Canvas)
+        + show_shape_options_menu()
+        + hide_shape_options_menu()
+        + handle_shape_selected(shape : Shape)
+        + handle_shape_deselected()
+    }
+
+    class ShapeOptionsWidget {
+        + ShapeOptionsWidget()
+        + edit_button_clicked()
+        + delete_button_clicked()
+        + copy_button_clicked()
+        + copy_group(group : Group) : Group
+        + group_button_clicked()
+        + ungroup_button_clicked()
+        + debug_print()
+        + shift_group_position(group : Group, shift_x : int, shift_y : int)
+        + export_file()
+        + import_file()
+    }
+
+    class ShapeEditDialog {
+        - shape : Shape
+        - start_point_x_input : QLineEdit
+        - start_point_y_input : QLineEdit
+        - end_point_x_input : QLineEdit
+        - end_point_y_input : QLineEdit
+        - color_combo : QComboBox
+        - corner_type_combo : QComboBox
+        + ShapeEditDialog(shape : Shape)
+        + save_changes()
+    }
+
+    class Canvas {
+        - shape_manager : ShapeManager
+        - start_point : QPointF
+        - toolbar : ToolBar
+        + Canvas(parent, toolbar)
+        + paintEvent(event : QPaintEvent)
+        + mousePressEvent(event : QMouseEvent)
+        + mouseMoveEvent(event : QMouseEvent)
+        + mouseReleaseEvent(event : QMouseEvent)
+        + handle_copy_shortcut()
+        + handle_delete_shortcut()
+        + toggle_selection(pos : QPoint)
+    }
+
+    class ShapeManager {
+        - shapes : List<Shape>
+        - groups : List<Group>
+        - current_shape : Shape
+        - selected_shape : Shape
+        - dragging : bool
+        - drag_start_pos : QPointF
+        - shape_start_pos : QPointF
+        - selected_shapes : Set<Shape>
+        - selected_groups : Set<Group>
+        - recent_export : List<String>
+        + add_shape(shape : Shape)
+        + remove_shape(shape : Shape)
+        + select_shape(pos : QPointF)
+        + update_shape_position(pos : QPointF)
+        + update_group_position(group : Group, delta : QPointF)
+        + draw_shapes(painter : QPainter)
+        + get_shape_at_pos(pos : QPointF) : Shape
+        + toggle_selection(obj : Object)
+        + create_group()
+        + ungroup(group : Group)
+        + remove_group(group : Group)
+        + remove_group_objects(group : Group)
+        + add_group(group : Group)
+        + add_group_objects(group : Group)
+        + export_all() : String
+        + iterate_objects()
+    }
+
+    DrawingArea *-- ToolBar
+    DrawingArea *-- Canvas
+
+    ToolBar *-- ShapeOptionsWidget
+
+    Canvas *-- ShapeManager
+    Canvas ..> ShapeEditDialog
+
+    ShapeManager *-- Group
+    ShapeManager ..> Shape
+}
+
+package Shapes {
+    class Group {
+        - objects : List<Object>
+        - belonging_group : Group
+        + boundingRect() : QRectF
+        + add_object(obj : Object)
+        + remove_object(obj : Object)
+    }
+
+    class Shape {
+        {abstract}
+        + boundingRect() : QRectF
+        + distance(point : QPointF) : float
+        + export() : String
+    }
+
+    class Line {
+        - start_point : QPointF
+        - end_point : QPointF
+        - color : QColor
+        - belonging_group : Group
+        + Line(start_point : QPointF, end_point : QPointF, color : QColor)
+        + boundingRect() : QRectF
+        + length() : float
+        + distance(point : QPointF) : float
+        + export() : String
+    }
+
+    class Rectangle {
+        - start_point : QPointF
+        - end_point : QPointF
+        - rounded : bool
+        - color : QColor
+        - belonging_group : Group
+        + Rectangle(start_point : QPointF, end_point : QPointF, rounded : bool, color : QColor)
+        + area() : float
+        + perimeter() : float
+        + boundingRect() : QRectF
+        + distance(point : QPointF) : float
+        + export() : String
+    }
+
+    Shape <|-- Line
+    Shape <|-- Rectangle
+
+    Group *-- Object
+    Object <|-- Shape
+}
+
+' package Utils {
+'     class WindowInstance {
+'         + set_window(window : MainWindow)
+'         + get_window() : MainWindow
+'     }
+
+'     class Colors {
+'         + get_color_name(color : String) : String
+'     }
+
+'     class Highlight {
+'         + closest_point(x1 : float, y1 : float, x2 : float, y2 : float, x : float, y : float) : Tuple<float, float>
+'         + distance_from_edge(x1 : float, y1 : float, x2 : float, y2 : float, x : float, y : float) : float
+'     }
+
+'     class Tools {
+'         + create_mouse_tool_icon() : QIcon
+'         + create_line_tool_icon() : QIcon
+'         + create_rect_tool_icon() : QIcon
+'     }
+
+'     class XmlIndent {
+'         + indent_xml(line : String, level : int) : String
+'         + nest(line : String, indent : String) : String
+'     }
+' }
+
+' Utils ..> DrawingArea
+' Utils ..> ShapeManager
+' Utils ..> Shapes
+
+@enduml

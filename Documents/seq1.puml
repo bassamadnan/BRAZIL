@@ -1,0 +1,46 @@
+@startuml
+autonumber
+
+participant User
+participant Canvas
+participant ShapeManager
+participant Group
+participant Shape
+participant ToolBar
+
+User -> Canvas : mousePressEvent(event)
+Canvas -> ShapeManager : select_shape(event.pos)
+
+alt if shape is part of a group
+    ShapeManager -> Group : boundingRect().contains(event.pos)
+    Group --> ShapeManager : true
+    ShapeManager --> Canvas : selected_shape = group
+    Canvas --> ToolBar : handle_shape_selected(group)
+    ToolBar -> ToolBar : show_shape_options_menu()
+else if individual shape selected
+    ShapeManager -> ShapeManager : get_shape_at_pos(event.pos)
+    ShapeManager --> Canvas : selected_shape = shape
+    Canvas --> ToolBar : handle_shape_selected(shape)
+    ToolBar -> ToolBar : show_shape_options_menu()
+end
+
+User -> Canvas : mouseMoveEvent(event)
+Canvas -> ShapeManager : update_shape_position(event.pos)
+
+alt if selected_shape is a group
+    ShapeManager -> ShapeManager : update_group_position(selected_shape, delta)
+    ShapeManager -> Group : update_group_position(group, delta)
+    Group -> Shape++ : update_position(delta)
+else if selected_shape is an individual shape
+    ShapeManager -> Shape : update_position(delta)
+end
+
+Canvas -> Canvas : update()
+
+User -> Canvas : mouseReleaseEvent(event)
+Canvas -> ShapeManager : dragging = false
+
+Canvas -> Canvas : update()
+Canvas -> ToolBar : refresh_drawing()
+
+@enduml

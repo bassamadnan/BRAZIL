@@ -1,0 +1,50 @@
+@startuml
+participant User
+participant ToolBar
+participant ShapeOptionsWidget
+participant ShapeEditDialog
+participant Shape
+participant ShapeManager
+participant Canvas
+
+User -> ToolBar : Select shape to edit
+ToolBar -> ShapeOptionsWidget : show_shape_options_menu()
+ShapeOptionsWidget -> ShapeOptionsWidget : edit_button_clicked()
+
+alt selected_shape is not null
+    ShapeOptionsWidget -> ShapeEditDialog : new(selected_shape)
+    User -> ShapeEditDialog : Edit shape attributes
+    User -> ShapeEditDialog : Confirm changes
+    ShapeEditDialog -> ShapeEditDialog : save_changes()
+
+    loop for each attribute
+        ShapeEditDialog -> Shape : Update attribute
+    end
+
+    ShapeEditDialog --> ShapeOptionsWidget : User confirms changes
+    ShapeOptionsWidget -> ToolBar : handle_shape_selected(updated_shape)
+    ToolBar -> ShapeManager : handle_shape_selected(updated_shape)
+
+    alt updated_shape is a Group
+        ShapeManager -> ShapeManager : update_group_position(updated_shape, ...)
+        loop for each object in updated_shape.objects
+            alt object is a Group
+                ShapeManager -> ShapeManager : update_group_position(object, ...)
+            else object is a Shape
+                ShapeManager -> ShapeManager : update_shape_position(object, ...)
+            end
+        end
+    else updated_shape is a Shape
+        ShapeManager -> ShapeManager : update_shape_position(updated_shape, ...)
+    end
+
+    ShapeManager -> Canvas : update() to refresh
+    Canvas -> Canvas : paintEvent()
+    Canvas -> ShapeManager : draw_shapes()
+    ShapeManager -> Canvas : Draw shapes with updated shape
+    Canvas -> Canvas : repaint()
+else selected_shape is null
+    ShapeOptionsWidget --> User : "No shape selected"
+end
+
+@enduml

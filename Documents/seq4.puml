@@ -1,0 +1,49 @@
+@startuml
+participant User
+participant Canvas
+participant ShapeManager
+participant Group
+participant Shape
+
+User -> Canvas : mousePressEvent(event)
+Canvas -> ShapeManager : get_shape_at_pos(event.pos)
+ShapeManager -> ShapeManager : find shape at position
+ShapeManager --> Canvas : return selectedShape
+
+alt selectedShape is a Group
+    Canvas -> ShapeManager : toggle_selection(selectedShape)
+    ShapeManager -> ShapeManager : add selectedShape to selected_groups
+
+    User -> Canvas : handle_ungrouping()
+    Canvas -> ToolBar : show_shape_options_menu()
+    ToolBar -> ShapeOptionsWidget : show_shape_options_menu()
+    ShapeOptionsWidget -> ShapeOptionsWidget : ungroup_button_clicked()
+    ShapeOptionsWidget -> ToolBar : selected_shape
+    ToolBar --> ShapeOptionsWidget : return selected_shape
+    alt selected_shape is a Group
+        ShapeOptionsWidget -> ShapeManager : ungroup(selected_shape)
+        ShapeManager -> ShapeManager : remove_group(selected_shape)
+        loop for each object in group.objects
+            ShapeManager -> Group : remove_object(obj)
+            Group --> ShapeManager : remove obj from group
+            alt obj is a Group
+                ShapeManager -> ShapeManager : ungroup(obj)
+                ShapeManager -> ShapeManager : remove_group_objects(obj)
+            else obj is a Shape
+                ShapeManager -> ShapeManager : add_shape(obj)
+            end
+        end
+        ShapeManager -> ShapeManager : remove selected_shape
+        ShapeManager -> Canvas : update()
+        Canvas -> ShapeManager : draw_shapes()
+        ShapeManager -> Canvas : draw updated shapes
+        Canvas -> Canvas : repaint()
+    else selected_shape is not a Group
+        ShapeOptionsWidget --> User : "No group selected"
+    end
+else selectedShape is not a Group
+    Canvas -> ShapeManager : toggle_selection(selectedShape)
+    ShapeManager -> ShapeManager : add selectedShape to selected_shapes
+end
+
+@enduml
