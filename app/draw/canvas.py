@@ -6,8 +6,11 @@ from app.shapes.line import Line
 from app.shapes.shapeManager import ShapeManager
 
 class Canvas(QWidget):
-    shapeSelected = pyqtSignal(object)  # Custom signal to emit the selected shape
-    shapeDeselected = pyqtSignal()  # Custom signal to emit when no shape is selected
+    """
+    Canvas relaetd functions, responsible for how user interacts with the GUI
+    """
+    shapeSelected = pyqtSignal(object)  # signal to emit the selected shape
+    shapeDeselected = pyqtSignal()  #  signal to emit when no shape is selected
 
     def __init__(self, parent=None, toolbar=None):
         super().__init__(parent)

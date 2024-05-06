@@ -6,6 +6,10 @@ from app.shapes.group import Group
 from app.utils.xml_indent import nest
 
 class ShapeManager:
+    """
+    Shape manager class to handle how shapes, groups, highlights are drawn. Handles all of the logic
+    Sort of suffers from blob/god class, can definately be  improved later.
+    """
     def __init__(self):
         self.shapes = []
         self.groups = []

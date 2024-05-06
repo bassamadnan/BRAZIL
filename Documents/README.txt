@@ -1,6 +1,4 @@
-# DASS Bonus Assignment
-
-## Instructions to run
+Instructions to run
 
 1. After cloning, navigate to root directory
 2. Create a virtual env by running the following command: python3 -m venv venv
@@ -9,7 +7,7 @@
 5. run main.py: python3 main.py
 
 
-## To navigate via the application
+To navigate via the application
 
 1. The window can/may be maximized
 2. the mouse icon (arrow) is selected initially, you may select the line or rectangle to draw them
@@ -21,16 +19,17 @@
 8. Import and Export for XML files are also supported, for exporting after drawing on canvas, click on export and enter file name you want to create.
 
 
-## Groups
+Groups
 
 1. Ensure the mouse icon is selected and (IMPORTANT) make sure you press Ctrl first, before even selecting the first shape. 
 2. While pressing ctrl (keep it pressed, dont release) highlight multiple shapes, and click on Group button
 3. Click on anywhere else on the canvas to see the border of group, initially the groups are highlighted by default
 4. You may move the group , which moves all the shapes, same goes for copying and deleting. Deleting a group first delees the shapes inside, and deleting it again deletes the entire group itself.
 5. Click on a group and press Ungroup, to ungroup the last layer of grouping, inner groups if present retain their grouping. (Note if it does not work then make sure you select the group first and then click on ungroup)
+6. Signal handling is also supported for groups (ctrl c, del)
 
 
-## Relevant information
+Relevant information
 
 We have used PyQt5, since it provides alot of components inbuilt, widgets, toolbar, paint functions, and GUI supports. 
 

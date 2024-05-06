@@ -4,6 +4,9 @@ from app.draw.shapeOptions import ShapeOptionsWidget
 from app.utils.tools import create_line_tool_icon, create_mouse_tool_icon, create_rect_tool_icon
 
 class ToolBar(QToolBar):
+    """
+    The acutal toolbar class, which initializes the icons of shapes and the mouse and other options
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         self.window = self.window()  # Get the reference to the main window

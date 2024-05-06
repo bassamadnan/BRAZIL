@@ -2,9 +2,11 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton
 from PyQt5.QtCore import QPointF
 from PyQt5.QtGui import QColor
 from app.shapes.rectangle import Rectangle
-from app.shapes.line import Line
 
 class ShapeEditDialog(QDialog):
+    """
+    Shape edit dialog opned up when edit button is clicked on a shape
+    """
     def __init__(self, shape, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Edit Shape")

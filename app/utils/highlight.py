@@ -1,4 +1,7 @@
 import math
+"""
+Highlight the shapes , math behind it
+"""
 
 def closest_point(x1, y1, x2, y2, x, y):
     if x1 == x2:

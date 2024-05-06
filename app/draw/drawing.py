@@ -7,7 +7,7 @@ from app.draw.canvas import Canvas
 class DrawingArea(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setMinimumSize(400, 400)
+        self.setMinimumSize(400, 400) #  minimum size, 400 by 400
         self.setFocusPolicy(Qt.StrongFocus)  # Enable keyboard focus
 
         self.toolbar = ToolBar(self)

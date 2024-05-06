@@ -3,6 +3,9 @@ from app.shapes.group import Group
 
 
 def import_xml_to_list(file_path):
+    """
+    Just take the int value to avoid precision errors for the cordinates.
+    """
     data_list = []
     tree = ET.parse(file_path)
     root = tree.getroot()

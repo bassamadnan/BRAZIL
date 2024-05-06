@@ -11,6 +11,9 @@ from app.utils.xmpl_parser import import_xml_to_list
 import os
 
 class ShapeOptionsWidget(QWidget):
+    """
+    Displays all the buttons on the toolbar
+    """
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout(self)
