@@ -178,19 +178,32 @@ class ShapeManager:
                 if isinstance(obj, Group):
                     self.ungroup(obj)  # Recursively ungroup nested groups
                 else:
+                    obj.belonging_group = None
                     if obj not in self.shapes:
                         self.shapes.append(obj)
-                obj.belonging_group = None
-            if self.selected_shape == group:
-                self.selected_shape = None
-   
-    def remove_group(self, group):
-        if group in self.groups:
-            self.groups.remove(group)
-            self.remove_group_objects(group)
             if self.selected_shape == group:
                 self.selected_shape = None
 
+    def add_group(self, group):
+        self.groups.append(group)
+        for obj in group.objects:
+            if isinstance(obj, Group):
+                self.add_group(obj)
+            else:
+                if obj in self.shapes:
+                    self.shapes.remove(obj)
+
+    def remove_group(self, group):
+        if group in self.groups:
+            self.groups.remove(group)
+            for obj in group.objects:
+                if isinstance(obj, Group):
+                    self.remove_group(obj)
+                else:
+                    if obj not in self.shapes:
+                        self.shapes.append(obj)
+            if self.selected_shape == group:
+                self.selected_shape = None
     def remove_group_objects(self, group):
         for obj in group.objects:
             if isinstance(obj, Group):
@@ -200,9 +213,6 @@ class ShapeManager:
             elif obj in self.shapes:
                 self.shapes.remove(obj)
 
-    def add_group(self, group):
-        self.groups.append(group)
-        self.add_group_objects(group)
 
     def add_group_objects(self, group):
         for obj in group.objects:
@@ -232,6 +242,7 @@ class ShapeManager:
                         self.recent_export.append(nest('</group>', indent))
             elif isinstance(obj, (Line, Rectangle)):
                 group = obj.belonging_group
+                visited.add(obj)
                 print(f"{indent}{type(obj).__name__} (addr: {hex(id(obj))})- Group addr: {hex(id(group))}")
                 self.recent_export.append(nest(obj.export(), indent))
 
@@ -241,7 +252,7 @@ class ShapeManager:
                 traverse(group, visited=visited)
 
         for shape in self.shapes:
-            if shape.belonging_group is None:
+            if shape.belonging_group is None and shape not in visited:
                 print(f"{type(shape).__name__} - Belongs to: None")
                 self.recent_export.append(shape.export())
         print(self.recent_export)
@@ -262,6 +273,7 @@ class ShapeManager:
                     if level: print(f"{indent}Group end")
             elif isinstance(obj, (Line, Rectangle)):
                 group = obj.belonging_group
+                visited.add(obj)
                 print(f"{indent}{type(obj).__name__} (addr: {hex(id(obj))})- Group addr: {hex(id(group))}")
 
         visited = set()
@@ -270,5 +282,5 @@ class ShapeManager:
                 traverse(group, visited=visited)
 
         for shape in self.shapes:
-            if shape.belonging_group is None:
+            if shape.belonging_group is None and shape not in visited:
                 print(f"{type(shape).__name__} - Belongs to: None")

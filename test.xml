@@ -1,26 +1,25 @@
 <window>
 <group>
-        <rectangle>
-            <upper-left>
-                <x>313</x>
-                <y>197</y>
-            </upper-left>
-            <lower-right>
-                <x>402</x>
-                <y>279</y>
-            </lower-right>
+        <line>
+            <begin>
+                <x>398</x>
+                <y>94</y>
+            </begin>
+            <end>
+                <x>366</x>
+                <y>135</y>
+            </end>
             <color>black</color>
-            <corner>square</corner>
-        </rectangle>
+        </line>
         
         <line>
             <begin>
-                <x>343</x>
-                <y>65</y>
+                <x>337</x>
+                <y>89</y>
             </begin>
             <end>
-                <x>407</x>
-                <y>125</y>
+                <x>317</x>
+                <y>133</y>
             </end>
             <color>black</color>
         </line>
@@ -29,52 +28,52 @@
 <group>
         <line>
             <begin>
-                <x>134</x>
-                <y>39</y>
+                <x>192</x>
+                <y>73</y>
             </begin>
             <end>
-                <x>100</x>
-                <y>97</y>
+                <x>156</x>
+                <y>106</y>
             </end>
             <color>black</color>
         </line>
         
         <line>
             <begin>
-                <x>233</x>
-                <y>80</y>
+                <x>119</x>
+                <y>38</y>
             </begin>
             <end>
-                <x>175</x>
-                <y>154</y>
+                <x>140</x>
+                <y>101</y>
             </end>
             <color>black</color>
         </line>
         
 </group>
+<rectangle>
+    <upper-left>
+        <x>470</x>
+        <y>157</y>
+    </upper-left>
+    <lower-right>
+        <x>539</x>
+        <y>203</y>
+    </lower-right>
+    <color>black</color>
+    <corner>square</corner>
+</rectangle>
+
 <line>
     <begin>
-        <x>469</x>
-        <y>66</y>
+        <x>443</x>
+        <y>70</y>
     </begin>
     <end>
-        <x>501</x>
-        <y>109</y>
+        <x>480</x>
+        <y>98</y>
     </end>
     <color>blue</color>
 </line>
-
-<rectangle>
-    <upper-left>
-        <x>556</x>
-        <y>253</y>
-    </upper-left>
-    <lower-right>
-        <x>652</x>
-        <y>311</y>
-    </lower-right>
-    <color>black</color>
-    <corner>rounded</corner>
-</rectangle>
 
 </window>

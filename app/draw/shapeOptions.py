@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QPushButton, QMenu, QToolButton, QFileDialog
 from PyQt5.QtCore import QPointF
 from PyQt5.QtGui import QColor
-from app.draw.shapeEdit import ShapeEditDialog
 from copy import deepcopy
+from xml.etree import ElementTree as ET
+from app.draw.shapeEdit import ShapeEditDialog
 from app.shapes.line import Line
 from app.shapes.rectangle import Rectangle
 from app.shapes.group import Group
@@ -165,42 +166,44 @@ class ShapeOptionsWidget(QWidget):
 
         if file_path:
             try:
-                data_list = import_xml_to_list(file_path)
+                tree = ET.parse(file_path)
+                root = tree.getroot()
+
+                data_list = import_xml_to_list(root)
 
                 self.parent().canvas.shape_manager.shapes.clear()
                 self.parent().canvas.shape_manager.groups.clear()
 
-                for data in data_list:
-                    if data['type'] == 'group':
-                        group = Group()
-                        self.parent().canvas.shape_manager.groups.append(group)
-                        for obj_data in data['objects']:
-                            if obj_data['type'] == 'rectangle':
-                                start_point = QPointF(obj_data['upper_left']['x'], obj_data['upper_left']['y'])
-                                end_point = QPointF(obj_data['lower_right']['x'], obj_data['lower_right']['y'])
-                                color = QColor(obj_data['color'])
-                                rounded = obj_data['corner'] == 'rounded'
-                                rectangle = Rectangle(start_point, end_point, rounded, color)
-                                group.add_object(rectangle)
-                            elif obj_data['type'] == 'line':
-                                start_point = QPointF(obj_data['begin']['x'], obj_data['begin']['y'])
-                                end_point = QPointF(obj_data['end']['x'], obj_data['end']['y'])
-                                color = QColor(obj_data['color'])
-                                line = Line(start_point, end_point, color)
-                                group.add_object(line)
-                    elif data['type'] == 'rectangle':
-                        start_point = QPointF(data['upper_left']['x'], data['upper_left']['y'])
-                        end_point = QPointF(data['lower_right']['x'], data['lower_right']['y'])
-                        color = QColor(data['color'])
-                        rounded = data['corner'] == 'rounded'
-                        rectangle = Rectangle(start_point, end_point, rounded, color)
-                        self.parent().canvas.shape_manager.shapes.append(rectangle)
-                    elif data['type'] == 'line':
-                        start_point = QPointF(data['begin']['x'], data['begin']['y'])
-                        end_point = QPointF(data['end']['x'], data['end']['y'])
-                        color = QColor(data['color'])
-                        line = Line(start_point, end_point, color)
-                        self.parent().canvas.shape_manager.shapes.append(line)
+                def create_objects(data_list, parent_group=None):
+                    for data in data_list:
+                        if data['type'] == 'group':
+                            group = Group()
+                            if parent_group:
+                                parent_group.add_object(group)
+                            else:
+                                self.parent().canvas.shape_manager.groups.append(group)
+                            create_objects(data['objects'], group)
+                        elif data['type'] == 'rectangle':
+                            start_point = QPointF(data['upper_left']['x'], data['upper_left']['y'])
+                            end_point = QPointF(data['lower_right']['x'], data['lower_right']['y'])
+                            color = QColor(data['color'])
+                            rounded = data['corner'] == 'rounded'
+                            rectangle = Rectangle(start_point, end_point, rounded, color)
+                            if parent_group:
+                                parent_group.add_object(rectangle)
+                            else:
+                                self.parent().canvas.shape_manager.shapes.append(rectangle)
+                        elif data['type'] == 'line':
+                            start_point = QPointF(data['begin']['x'], data['begin']['y'])
+                            end_point = QPointF(data['end']['x'], data['end']['y'])
+                            color = QColor(data['color'])
+                            line = Line(start_point, end_point, color)
+                            if parent_group:
+                                parent_group.add_object(line)
+                            else:
+                                self.parent().canvas.shape_manager.shapes.append(line)
+
+                create_objects(data_list)
 
                 self.parent().canvas.update()
             except FileNotFoundError:
